@@ -140,14 +140,13 @@ Las contribuciones son bienvenidas. Por favor:
 
 Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
-## 📞 Contacto
+## 🎯 Inspiración
 
-Tu Nombre - [@tu_twitter](https://twitter.com/tu_twitter) - tu.email@example.com
-
-Link del Proyecto: [https://github.com/tu-usuario/visualbtc](https://github.com/tu-usuario/visualbtc)
+Este proyecto está inspirado en el trabajo original de [MrFreeDragon/VisualBTC](https://github.com/MrFreeDragon/VisualBTC). Agradecimientos especiales por la inspiración y el concepto innovador de generación visual de claves Bitcoin.
 
 ## 🙏 Agradecimientos
 
+- [MrFreeDragon](https://github.com/MrFreeDragon/VisualBTC) por el concepto original e inspiración
 - [Streamlit](https://streamlit.io/) por el framework web
 - [ECDSA](https://github.com/starkbank/ecdsa-python) por la criptografía de curva elíptica
 - [qrcode](https://github.com/lincolnloop/python-qrcode) por la generación de códigos QR

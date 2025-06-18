@@ -4,4 +4,3 @@ ecdsa>=0.18.0
 base58>=2.1.1
 qrcode[pil]>=7.4.2
 Pillow>=10.0.0
-numpy>=1.24.0

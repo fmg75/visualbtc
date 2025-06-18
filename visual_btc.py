@@ -4,7 +4,6 @@ import ecdsa
 import base58
 import qrcode
 from io import BytesIO
-import numpy as np
 import random
 
 def create_qr_code(data):
