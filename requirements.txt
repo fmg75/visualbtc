@@ -1,5 +1,4 @@
 streamlit>=1.46.0
-hashlib-compat>=1.0.1
 ecdsa>=0.18.0
 base58>=2.1.1
 qrcode[pil]>=7.4.2
