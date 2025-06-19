@@ -5,6 +5,8 @@ import base58
 import qrcode
 from io import BytesIO
 import random
+import requests
+import time
 
 def create_qr_code(data):
     """Creates a QR code and returns it as an image"""
@@ -17,6 +19,22 @@ def create_qr_code(data):
     img.save(buf, format='PNG')
     buf.seek(0)
     return buf
+
+def get_address_balance(address):
+    """Gets the balance of a Bitcoin address from blockchain.info"""
+    try:
+        url = f"https://blockchain.info/q/addressbalance/{address}"
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            # Balance is returned in satoshis, convert to BTC
+            balance_satoshis = int(response.text.strip())
+            balance_btc = balance_satoshis / 100000000  # Convert satoshis to BTC
+            return balance_btc, balance_satoshis
+        else:
+            return None, None
+    except Exception as e:
+        st.error(f"Error checking balance: {str(e)}")
+        return None, None
 
 def private_key_to_wif(private_key_hex, compressed=True):
     """Converts a private key in hexadecimal format to WIF"""
@@ -163,58 +181,41 @@ with col_comp2:
 
 st.markdown("---")
 
-# Create interactive grid with smaller cells
+# Create interactive grid with much smaller cells
 st.markdown("### Visual Grid (16x16 = 256 bits)")
 st.markdown("Click cells to toggle bits. **Black = 1, White = 0**")
 
-# Custom CSS for smaller grid
+# Custom CSS for much smaller grid
 st.markdown("""
 <style>
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(16, 20px);
-    grid-template-rows: repeat(16, 20px);
-    gap: 1px;
-    justify-content: center;
-    margin: 20px 0;
-}
-.grid-cell {
-    width: 20px;
-    height: 20px;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-}
-.grid-cell-active {
-    background-color: #000;
-    color: white;
-}
-.grid-cell-inactive {
-    background-color: #fff;
-    color: black;
+.small-button {
+    padding: 0px !important;
+    margin: 0px !important;
+    width: 15px !important;
+    height: 15px !important;
+    min-height: 15px !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    border-radius: 2px !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Create the grid using columns but with smaller spacing
-grid_cols = st.columns(16, gap="small")
-for i in range(16):
-    for j in range(16):
-        col_idx = j
-        with grid_cols[col_idx]:
-            if st.session_state.grid[i][j]:
-                if st.button("⬛", key=f"cell_{i}_{j}", help=f"Row {i+1}, Col {j+1} - Bit: 1", 
-                           use_container_width=True):
-                    st.session_state.grid[i][j] = False
-                    st.rerun()
-            else:
-                if st.button("⬜", key=f"cell_{i}_{j}", help=f"Row {i+1}, Col {j+1} - Bit: 0", 
-                           use_container_width=True):
-                    st.session_state.grid[i][j] = True
-                    st.rerun()
+# Create the grid using columns but with much smaller spacing
+grid_container = st.container()
+with grid_container:
+    for i in range(16):
+        grid_cols = st.columns(16, gap="small")
+        for j in range(16):
+            with grid_cols[j]:
+                if st.session_state.grid[i][j]:
+                    if st.button("⬛", key=f"cell_{i}_{j}", help=f"Row {i+1}, Col {j+1} - Bit: 1"):
+                        st.session_state.grid[i][j] = False
+                        st.rerun()
+                else:
+                    if st.button("⬜", key=f"cell_{i}_{j}", help=f"Row {i+1}, Col {j+1} - Bit: 0"):
+                        st.session_state.grid[i][j] = True
+                        st.rerun()
 
 st.markdown("---")
 
@@ -243,8 +244,20 @@ if hex_key != '0' * 64:  # Only generate if at least one bit is active
                 st.markdown("**Private Key (WIF):**")
                 st.code(wif_key, language="text")
                 
+                # Bitcoin Address with Automatic Balance Check
                 st.markdown("**Bitcoin Address:**")
                 st.code(btc_address, language="text")
+                
+                # Automatic balance check
+                with st.spinner("Checking balance..."):
+                    balance_btc, balance_sats = get_address_balance(btc_address)
+                    if balance_btc is not None:
+                        if balance_btc > 0:
+                            st.success(f"💰 **Balance: {balance_btc:.8f} BTC** ({balance_sats:,} sats)")
+                        else:
+                            st.info("💰 **Balance: 0 BTC**")
+                    else:
+                        st.error("❌ Error checking balance")
             
             with col2:
                 key_type = "Compressed" if st.session_state.compressed else "Uncompressed"
@@ -328,7 +341,8 @@ st.markdown(
     "3. **Generation:** Bits are converted to a hexadecimal private key\n"
     "4. **Conversion:** Key is converted to WIF format and Bitcoin address is generated\n"
     "5. **QR Codes:** QR codes are created for easy use with mobile wallets\n"
-    "6. **Compression:** Toggle between compressed and uncompressed key formats"
+    "6. **Compression:** Toggle between compressed and uncompressed key formats\n"
+    "7. **Balance Check:** Click 'Check Balance' to see if the address has any Bitcoin"
 )
 
 # Key format explanation
